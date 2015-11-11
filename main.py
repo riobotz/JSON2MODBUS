@@ -16,8 +16,6 @@ def read_value():
 		pom = request.url
 		ind = pom.find('?')
 		data = pom[ind+1:len(pom)]
-		print 'x'
-		#out="dd"
 		out=handle_read(json.loads(data))
 	return out
 
