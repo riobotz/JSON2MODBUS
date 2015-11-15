@@ -1,5 +1,3 @@
-#from serialHandler import mod_write
-#from serialHandler import mod_read
 from flask import Flask
 from flask import request
 from handler import handle_read
