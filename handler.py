@@ -4,7 +4,7 @@ import crc16
 
 def handle_write(inp):
 	# struktutra ramki  addr;funkcja;adres poczatkowy;liczba rejestro;crc
-
+	print inp
 	#wyciaganie wartosci z wejscia
 	addr=inp['addr']
 	baud=inp['baud']
@@ -12,6 +12,7 @@ def handle_write(inp):
 	value=inp['val']
 
 	frame=construct_frame_set(addr,starting_address,value)
+	print frame
 	anws=send_and_get_anws(frame,baud)
 	ret=decompose_frame(anws)
 
@@ -26,6 +27,7 @@ def handle_read(inp):
 	baud=inp['baud']
 	starting_address=inp['st']
 	num_of_registers=inp['reg']
+	baud=int(baud)
 
 	#przygotowanie ramki
 	frame=construct_frame_request(addr,starting_address,num_of_registers)
@@ -55,13 +57,15 @@ def construct_frame_set(device_address,start_register_address,value):
 
 def construct_frame(device_address,start_register_address,data):
 	#frame=input_to_binary(device_address,start_register_address,data)
-	if (start_register_address>255):
-		lo_reg_addr=start_register_address%256
-		hi_reg_addr=start_register_address/256
-	else:
-		hi_reg_addr=0
-		lo_reg_addr=start_register_address
+	print 'constructing frame'
+	start_register_address=int(start_register_address)
+	device_address=int(device_address)
+	data=int(data)
+	lo_reg_addr=start_register_address%256
+	hi_reg_addr=start_register_address/256
+	print lo_reg_addr
 	frame=add_crc(chr(device_address)+chr(3)+chr(hi_reg_addr)+chr(lo_reg_addr)+chr(0)+chr(data))
+	print 'frame constructed'
 	return frame
 
 def input_to_binary(device_address,start_regiter_address,data): #obsolete
@@ -77,16 +81,19 @@ def add_crc(frame):
 	return frame + crc_hi +crc_lo
 
 def send_and_get_anws(frame,baud):
+	print "sending frame..."
 	ser = serial.Serial(port=get_port_name(),baudrate=baud,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=1)
 	ser.open()
 	ser.write(frame)
+	print "waiting for anwser..."
 	anwser=ser.read(8)
 	ser.close()
+	print "anwser recievied"
 	return anwser
 
 
 def get_port_name():
-	return 'COM2'
+	return '/dev/ttyS0'
 
 def decompose_frame(frame): #zwraca wartosc z ostatniego odpytanego rejestru
 	#frame=frame/65536
