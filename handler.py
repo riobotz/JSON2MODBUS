@@ -1,4 +1,4 @@
-#import serial
+import serial
 import binascii
 import crc16
 
@@ -12,12 +12,12 @@ def handle_write(inp):
 	value=inp['val']
 
 	frame=construct_frame_set(addr,starting_address,value)
-	print frame
+	frame_viz(frame);
 	anws=send_and_get_anws(frame,baud)
 	ret=decompose_frame(anws)
 
 	#dopoki kod nie dziala, zwraca 100
-	ret={'result' : 100, 'status': 'ack'}
+	#ret={'result' : 100, 'status': 'ack'}
 	return ret
 
 def handle_read(inp):
@@ -31,8 +31,9 @@ def handle_read(inp):
 
 	#przygotowanie ramki
 	frame=construct_frame_request(addr,starting_address,num_of_registers)
-	#wyslanie ramki i odbior odpowiedzi	
+	#wyslanie ramki i odbior odpowiedzi
 	anws=send_and_get_anws(frame,baud)
+	frame_viz(anws)
 	#wyciagniecie wartosci z odpowiedzi
 	ret=decompose_frame(anws)
 
@@ -48,14 +49,14 @@ def handle_read(inp):
 
 def construct_frame_request(device_address,start_register_address,number_of_registers):
 	number_of_registers=1 # na razie ograniczam liczbe rejestrow do odczytu na raz do 1
-	ret=construct_frame(device_address,start_register_address,number_of_registers)
+	ret=construct_frame(device_address,3,start_register_address,number_of_registers)
 	return ret
 
 def construct_frame_set(device_address,start_register_address,value):
-	ret=construct_frame(device_address,start_register_address,value)
+	ret=construct_frame(device_address,6,start_register_address,value)
 	return ret
 
-def construct_frame(device_address,start_register_address,data):
+def construct_frame(device_address,func,start_register_address,data):
 	#frame=input_to_binary(device_address,start_register_address,data)
 	print 'constructing frame'
 	start_register_address=int(start_register_address)
@@ -63,9 +64,9 @@ def construct_frame(device_address,start_register_address,data):
 	data=int(data)
 	lo_reg_addr=start_register_address%256
 	hi_reg_addr=start_register_address/256
-	print lo_reg_addr
-	frame=add_crc(chr(device_address)+chr(3)+chr(hi_reg_addr)+chr(lo_reg_addr)+chr(0)+chr(data))
+	frame=add_crc(chr(device_address)+chr(func)+chr(hi_reg_addr)+chr(lo_reg_addr)+chr(0)+chr(data))
 	print 'frame constructed'
+	print frame_viz(frame)
 	return frame
 
 def input_to_binary(device_address,start_regiter_address,data): #obsolete
@@ -82,24 +83,23 @@ def add_crc(frame):
 
 def send_and_get_anws(frame,baud):
 	print "sending frame..."
-	ser = serial.Serial(port=get_port_name(),baudrate=baud,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=1)
-	ser.open()
+	ser = serial.Serial(port='COM2',baudrate=9600,timeout=10)
 	ser.write(frame)
 	print "waiting for anwser..."
 	anwser=ser.read(8)
 	ser.close()
-	print "anwser recievied"
+	print "anwser recieved"
 	return anwser
 
-
 def get_port_name():
-	return '/dev/ttyS0'
+	return 'COM2'
 
 def decompose_frame(frame): #zwraca wartosc z ostatniego odpytanego rejestru
 	#frame=frame/65536
 	#mask=0b1111111111111111 #wycina z ramki ostatnie dwa bajty, po usunieciu crc
 	#value=frame & mask
-	print (frame)
+	print 'decomposing...'
+	frame_viz(frame)
 	value=ord(frame[4])+ord(frame[5])
 	return value
 
@@ -154,3 +154,12 @@ def get_msg_len(msg):
 		msg=msg>>1
 		l += 1
 	return l
+
+def frame_viz(inp):
+	if(len(inp)==8):
+		print 'Addr  |Func	|Reg_addr	|V		|CRC'
+		print '#	'+str(ord(inp[0]))+'#	'+str(ord(inp[1]))+'#	'+str(256*ord(inp[2])+ord(inp[3]))+'#	'+str(256*ord(inp[4])+ord(inp[5]))+'#	'+str(256*ord(inp[6])+ord(inp[7]))+'#'
+	else:
+		print 'too short frame'
+		print 'Addr  |Func	|Err		|CRC'
+		print '#	'+str(ord(inp[0]))+'#	'+str(ord(inp[1]))+'#	'+str(ord(inp[2]))+'#	'+str(256*ord(inp[3])+ord(inp[4]))+'#'
