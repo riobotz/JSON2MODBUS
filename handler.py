@@ -83,16 +83,16 @@ def add_crc(frame):
 
 def send_and_get_anws(frame,baud):
 	print "sending frame..."
-	ser = serial.Serial(port='COM2',baudrate=9600,timeout=10)
+	ser = serial.Serial(port=get_port_name(),baudrate=9600,timeout=10)
 	ser.write(frame)
 	print "waiting for anwser..."
-	anwser=ser.read(8)
+	anwser=ser.read(7)
 	ser.close()
 	print "anwser recieved"
 	return anwser
 
 def get_port_name():
-	return 'COM2'
+	return 'COM3'
 
 def decompose_frame(frame): #zwraca wartosc z ostatniego odpytanego rejestru
 	#frame=frame/65536
@@ -100,7 +100,7 @@ def decompose_frame(frame): #zwraca wartosc z ostatniego odpytanego rejestru
 	#value=frame & mask
 	print 'decomposing...'
 	frame_viz(frame)
-	value=ord(frame[4])+ord(frame[5])
+	value=ord(frame[3])+ord(frame[4])
 	return value
 
 def calc_crc16(msg):
