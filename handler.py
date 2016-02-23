@@ -83,7 +83,7 @@ def add_crc(frame):
 
 def send_and_get_anws(frame,baud):
 	print "sending frame..."
-	ser = serial.Serial(port=get_port_name(),baudrate=9600,timeout=10)
+	ser = serial.Serial(port=get_port_name(),baudrate=9600,timeout=3)
 	ser.write(frame)
 	print "waiting for anwser..."
 	anwser=ser.read(7)
@@ -159,6 +159,9 @@ def frame_viz(inp):
 	if(len(inp)==8):
 		print 'Addr  |Func	|Reg_addr	|V		|CRC'
 		print '#	'+str(ord(inp[0]))+'#	'+str(ord(inp[1]))+'#	'+str(256*ord(inp[2])+ord(inp[3]))+'#	'+str(256*ord(inp[4])+ord(inp[5]))+'#	'+str(256*ord(inp[6])+ord(inp[7]))+'#'
+	elif (len(inp)==7):
+		print 'Addr  |Func	|Reg_addr	|V		|CRC'
+		print '#	'+str(ord(inp[0]))+'#	'+str(ord(inp[1]))+'#	'+str(256*0+ord(inp[2]))+'#	'+str(256*ord(inp[3])+ord(inp[4]))+'#	'+str(256*ord(inp[5])+ord(inp[6]))+'#'
 	else:
 		print 'too short frame'
 		print 'Addr  |Func	|Err		|CRC'

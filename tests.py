@@ -33,7 +33,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_compose_frame(self):
         out=construct_frame(7,3,7,7)
-        desired_output='730707'
+        desired_output="730707"
         self.assertEqual(out[0:-2],desired_output)
 
     def test_decompose_frame(self):
