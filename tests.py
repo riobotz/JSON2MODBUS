@@ -7,8 +7,12 @@ from handler import get_msg_len
 from handler import construct_frame
 from handler import handle_write
 from handler import handle_read
+from handler import split8bit
+from handler import read
+from handler import write
 import binascii
 import json
+import session
 
 class MyTestCase(unittest.TestCase):
 
@@ -52,6 +56,27 @@ class MyTestCase(unittest.TestCase):
         r=handle_read(json.loads('{"addr":"7","baud":"9600","st":"1","reg":"1"}'))
         print r
 
+    def test_split8bit1(self):
+        print 'check split1'
+        out=split8bit(1023)
+        self.assertEqual([3, 255], out)
+
+    def test_split8bit2(self):
+        print 'check split2'
+        out=split8bit(2048)
+        self.assertEqual([8, 0], out)
+
+    def test_write(self):
+        print 'Sending communiaction'
+        s=session.session()
+        r=write(json.loads('{"addr":"7","baud":"9600","st":"300","val":"100"}'),s)
+        print r
+        sleep(30)
+
+    def test_read(self):
+        s=session.session()
+        r=read(json.loads('{"addr":"7","baud":"9600","st":"1","reg":"1"}'),s)
+        print r
 
 if __name__ == '__main__':
     unittest.main()
