@@ -78,5 +78,11 @@ class MyTestCase(unittest.TestCase):
         r=read(json.loads('{"addr":"7","baud":"9600","st":"1","reg":"1"}'),s)
         print r
 
+    def test_read2(self):
+
+        s=session.session()
+        r=read(json.loads('{"addr":"7","baud":"9600","st":"100","reg":"1"}'),s)
+        print r
+
 if __name__ == '__main__':
     unittest.main()

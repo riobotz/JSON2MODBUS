@@ -158,7 +158,7 @@ def decompose_frame(frame): #zwraca wartosc z ostatniego odpytanego rejestru
 	#value=frame & mask
 	print 'decomposing...'
 	frame_viz(frame)
-	value=ord(frame[3])+ord(frame[4])
+	value=256*ord(frame[3])+ord(frame[4])
 	return value
 
 def calc_crc16(msg):
