@@ -1,5 +1,6 @@
 from time import sleep
 import unittest
+from handler import crc16_ccitt
 from handler import calc_crc16
 from handler import input_to_binary
 from handler import decompose_frame
@@ -24,11 +25,10 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(l,33)
 
     def test_crc(self):
-        crc =  calc_crc16('730707')
-        print bin(crc)
-        print bin(0x2590)
-        print bin(0x40EB)
-        self.assertEqual(crc,0xD4F2)
+        #crc =  crc16_ccitt(0x8005,'0706012C0064')
+        inp= '\0x07\0x06\0x01\0x2C\0x00\0x64'
+        crc= calc_crc16(inp)
+        self.assertEqual(crc,0x7248)
 
     def test_frame_no_crc(self):
         out=input_to_binary(7,7,7)
@@ -69,13 +69,13 @@ class MyTestCase(unittest.TestCase):
     def test_write(self):
         print 'Sending communiaction'
         s=session.session()
-        r=write(json.loads('{"addr":"7","baud":"9600","st":"300","val":"100"}'),s)
+        r=write(json.loads('{"addr":"7","baud":"9600","st":"300","val":"1023"}'),s)
         print r
         sleep(30)
 
     def test_read(self):
         s=session.session()
-        r=read(json.loads('{"addr":"7","baud":"9600","st":"1","reg":"1"}'),s)
+        r=read(json.loads('{"addr":"7","baud":"9600","st":"10","reg":"1"}'),s)
         print r
 
     def test_read2(self):

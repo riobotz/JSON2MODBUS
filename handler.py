@@ -1,7 +1,10 @@
+from crc import crc
+import sys,os
 import serial
 import binascii
 import crc16
 import session
+import subprocess
 
 def handle_write(inp):
 	# struktutra ramki  addr;funkcja;adres poczatkowy;liczba rejestro;crc
@@ -162,7 +165,36 @@ def decompose_frame(frame): #zwraca wartosc z ostatniego odpytanego rejestru
 	return value
 
 def calc_crc16(msg):
-	return crc16.crc16xmodem(msg)
+	if (True):
+		msg=ensure_hex(msg)
+		msg=msg.replace('0x','').upper()
+		c=subprocess.call("modbus_calc.exe "+str(msg))
+		h=c/256
+		l=c%256
+		ret=l*256+h
+		print hex(ret)
+	else:
+		ret=0x4872
+	return ret
+
+def ensure_hex(inp):
+	ret=''
+	for l in inp:
+		if ord(l)<16:
+			ret=ret+'0'+str(hex(ord(l)))
+		else:
+			ret=ret+str(hex(ord(l)))
+	return ret
+
+def crc16_ccitt(crc, data):
+    msb = crc >> 8
+    lsb = crc & 255
+    for c in data:
+        x = ord(c) ^ msb
+        x ^= (x >> 4)
+        msb = (lsb ^ (x >> 3) ^ (x << 4)) & 255
+        lsb = (x ^ (x << 5)) & 255
+    return (msb << 8) + lsb
 
 def calc_crc16_old(msg):
 	l=get_msg_len(msg)
